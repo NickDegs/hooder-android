@@ -1,9 +1,13 @@
 package app.realvirtuality.landlord.ui.screens
 
 import android.app.Activity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -19,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.os.LocaleListCompat
 import app.realvirtuality.landlord.data.Billing
 import app.realvirtuality.landlord.data.GameVM
 import app.realvirtuality.landlord.data.Property
@@ -180,8 +185,27 @@ fun RankingsScreen(vm: GameVM) {
 @Composable
 fun SettingsScreen(vm: GameVM) {
     val cash by vm.cash.collectAsState()
+    val langs = listOf("en" to "English", "tr" to "Türkçe", "es" to "Español", "fr" to "Français",
+        "de" to "Deutsch", "it" to "Italiano", "pt" to "Português", "ru" to "Русский", "ar" to "العربية",
+        "zh" to "中文", "ja" to "日本語", "ko" to "한국어", "uk" to "Українська", "hi" to "हिन्दी",
+        "az" to "Azərbaycan", "fa" to "فارسی")
     ScreenScaffold("Ayarlar") {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.fillMaxWidth().liquidGlass(16).padding(14.dp)) {
+                Text("Dil / Language", color = Brand.text, fontWeight = FontWeight.SemiBold)
+                Row(Modifier.horizontalScroll(rememberScrollState()).padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    langs.forEach { (code, name) ->
+                        Text(name, color = Brand.primary, fontSize = 13.sp,
+                            modifier = Modifier.clip(RoundedCornerShape(99.dp))
+                                .background(Brand.primary.copy(alpha = 0.14f))
+                                .clickable {
+                                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(code))
+                                }
+                                .padding(horizontal = 12.dp, vertical = 7.dp))
+                    }
+                }
+            }
             InfoCard("Sunucu-Otoriter Ekonomi",
                 "Nakit, mülk ve gelir sunucuda tutulur — hile/korsan kazanç sağlamaz.")
             InfoCard("Çevrimiçi Kimlik", "Oyun kimlik/token olmadan ve internetsiz açılmaz.")
