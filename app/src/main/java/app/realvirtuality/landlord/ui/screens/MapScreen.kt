@@ -26,6 +26,7 @@ import app.realvirtuality.landlord.data.GameVM
 import app.realvirtuality.landlord.data.Property
 import app.realvirtuality.landlord.ui.money
 import app.realvirtuality.landlord.ui.theme.Brand
+import app.realvirtuality.landlord.ui.theme.liquidGlass
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
