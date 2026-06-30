@@ -78,6 +78,7 @@ fun PortfolioScreen(vm: GameVM) {
 fun ForexScreen(vm: GameVM) {
     val rates by vm.rates.collectAsState()
     val idx by vm.marketIndex.collectAsState()
+    val fx by vm.fx.collectAsState()
     val flags = mapOf("EUR" to "🇪🇺","GBP" to "🇬🇧","JPY" to "🇯🇵","TRY" to "🇹🇷",
         "CNY" to "🇨🇳","AED" to "🇦🇪","CHF" to "🇨🇭","CAD" to "🇨🇦")
     ScreenScaffold("Döviz") {
@@ -86,11 +87,30 @@ fun ForexScreen(vm: GameVM) {
         Spacer(Modifier.height(8.dp))
         LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
             items(rates.entries.toList()) { (code, rate) ->
-                Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 5.dp)
-                    .liquidGlass(16).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("${flags[code] ?: "💱"}  $code", color = Brand.text, fontWeight = FontWeight.SemiBold)
-                    Spacer(Modifier.weight(1f))
-                    Text("1 USD = ${"%.4f".format(rate)}", color = Brand.textSub)
+                val pos = fx[code]
+                Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 5.dp)
+                    .liquidGlass(16).padding(14.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("${flags[code] ?: "💱"}  $code", color = Brand.text, fontWeight = FontWeight.SemiBold)
+                        Spacer(Modifier.weight(1f))
+                        Text("1 USD = ${"%.4f".format(rate)}", color = Brand.textSub)
+                    }
+                    if (pos != null && pos.units > 0) {
+                        val value = if (rate > 0) pos.units / rate else 0.0
+                        Text("Pozisyon: ${"%.0f".format(pos.units)} $code  ≈ ${money(value)}",
+                            color = Brand.green, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
+                    }
+                    Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = { vm.buyFx(code, 1_000_000.0) },
+                            colors = ButtonDefaults.buttonColors(containerColor = Brand.primary),
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp),
+                            shape = RoundedCornerShape(99.dp)) { Text("Al \$1M", fontSize = 12.sp) }
+                        if (pos != null && pos.units > 0)
+                            Button(onClick = { vm.sellFx(code) },
+                                colors = ButtonDefaults.buttonColors(containerColor = Brand.orange),
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp),
+                                shape = RoundedCornerShape(99.dp)) { Text("Sat", fontSize = 12.sp) }
+                    }
                 }
             }
         }

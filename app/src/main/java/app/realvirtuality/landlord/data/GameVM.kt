@@ -24,6 +24,7 @@ class GameVM(app: Application) : AndroidViewModel(app) {
     val rates = MutableStateFlow<Map<String, Double>>(emptyMap())
     val marketIndex = MutableStateFlow(1.0)
     val leaders = MutableStateFlow<List<Leader>>(emptyList())
+    val fx = MutableStateFlow<Map<String, FxPosition>>(emptyMap())
 
     private val prefs = app.getSharedPreferences("hooder", Context.MODE_PRIVATE)
     private val registry = LinkedHashMap<String, Property>()
@@ -74,6 +75,26 @@ class GameVM(app: Application) : AndroidViewModel(app) {
         cash.value = w.cash
         ownedIds.value = w.owned.map { it.id }.toSet()
         isVip.value = w.vip
+        fx.value = w.fx
+    }
+
+    // Döviz al (usd nakitle) / sat (pozisyonu kapat) — SUNUCU otoriter
+    fun buyFx(code: String, usd: Double) {
+        val rate = rates.value[code] ?: return
+        if (usd <= 0 || cash.value < usd) return
+        cash.value -= usd
+        viewModelScope.launch {
+            Api.fxTrade(code, usd, true, rate)?.let { cash.value = it }
+            syncWallet()
+        }
+    }
+    fun sellFx(code: String) {
+        val rate = rates.value[code] ?: return
+        if ((fx.value[code]?.units ?: 0.0) <= 0) return
+        viewModelScope.launch {
+            Api.fxTrade(code, 0.0, false, rate)?.let { cash.value = it }
+            syncWallet()
+        }
     }
 
     private suspend fun economyLoop() {
