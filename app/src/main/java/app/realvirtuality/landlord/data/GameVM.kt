@@ -141,6 +141,22 @@ class GameVM(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    // Rakibe teklif: kabul eşiği fiyatın %15 üstü. 0=yetersiz/geçersiz, 1=kabul, 2=red(düşük)
+    fun makeOffer(p: Property, amount: Double, onResult: (Int) -> Unit) {
+        val floor = livePrice(p) * 1.15
+        if (amount < floor) { onResult(2); return }
+        if (cash.value < amount) { onResult(0); return }
+        cash.value -= amount
+        ownedIds.value = ownedIds.value + p.id
+        viewModelScope.launch {
+            val nc = Api.buy(p.id, amount)
+            if (nc != null) { cash.value = nc; Api.recordTrade(true, amount) } else syncWallet()
+            onResult(if (nc != null) 1 else 0)
+        }
+    }
+
+    fun rivalOwner(p: Property): String? = if (isOwned(p.id)) null else Rivals.owner(p)
+
     fun buy(p: Property, onResult: (Boolean) -> Unit) {
         val cost = livePrice(p)
         if (isOwned(p.id) || cash.value < cost) { onResult(false); return }

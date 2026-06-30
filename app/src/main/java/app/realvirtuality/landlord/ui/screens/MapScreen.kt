@@ -175,12 +175,15 @@ fun MapScreen(vm: GameVM) {
 
 @Composable
 private fun Pill(p: Property, isOwned: Boolean, vm: GameVM, onTap: () -> Unit) {
-    val accent = if (isOwned) Brand.green else Brand.text
+    val rival = !isOwned && vm.rivalOwner(p) != null
+    val accent = if (isOwned) Brand.green else if (rival) Brand.orange else Brand.text
     Row(
         Modifier.clip(RoundedCornerShape(99.dp))
-            .background(Brush.verticalGradient(
-                if (isOwned) listOf(Color(0xCC1A4A2E), Color(0xEE08200F))
-                else listOf(Color(0xBB28324F), Color(0xEE080B16))))
+            .background(Brush.verticalGradient(when {
+                isOwned -> listOf(Color(0xCC1A4A2E), Color(0xEE08200F))
+                rival -> listOf(Color(0xBB4A3410), Color(0xEE1A1206))
+                else -> listOf(Color(0xBB28324F), Color(0xEE080B16))
+            }))
             .clickable { onTap() }
             .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -206,13 +209,26 @@ private fun BuySheet(p: Property, vm: GameVM, isOwned: Boolean, onClose: () -> U
                 Stat("Günlük", money(p.incomePerDay))
                 Stat("Prestij", "★".repeat(p.prestige))
             }
-            msg?.let { Text(it, color = Brand.green, fontSize = 14.sp) }
-            if (!isOwned) Button(
-                onClick = { vm.buy(p) { ok -> msg = if (ok) "✓ Satın alındı" else "Yetersiz bakiye" } },
-                colors = ButtonDefaults.buttonColors(containerColor = Brand.primary),
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("Satın Al · ${money(vm.livePrice(p))}") }
-            else Text("✓ Bu mülk senin", color = Brand.green, fontWeight = FontWeight.Bold)
+            val rival = remember(p) { vm.rivalOwner(p) }
+            msg?.let { Text(it, color = if (it.startsWith("✓")) Brand.green else Brand.orange, fontSize = 14.sp) }
+            when {
+                isOwned -> Text("✓ Bu mülk senin", color = Brand.green, fontWeight = FontWeight.Bold)
+                rival != null -> {
+                    val offer = vm.livePrice(p) * 1.2
+                    Text("Rakip sahip: $rival", color = Brand.orange, fontSize = 13.sp)
+                    Button(
+                        onClick = { vm.makeOffer(p, offer) { r -> msg = when (r) {
+                            1 -> "✓ Teklif kabul — mülk senin!"; 2 -> "Düşük teklif, reddedildi"; else -> "Yetersiz bakiye" } } },
+                        colors = ButtonDefaults.buttonColors(containerColor = Brand.orange),
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("Teklif Yolla · ${money(offer)}") }
+                }
+                else -> Button(
+                    onClick = { vm.buy(p) { ok -> msg = if (ok) "✓ Satın alındı" else "Yetersiz bakiye" } },
+                    colors = ButtonDefaults.buttonColors(containerColor = Brand.primary),
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Satın Al · ${money(vm.livePrice(p))}") }
+            }
         }
     }
 }
