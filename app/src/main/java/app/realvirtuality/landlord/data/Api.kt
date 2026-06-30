@@ -189,10 +189,10 @@ object Api {
         fun round100k(v: Double) = (v / 100_000.0).roundToLong() * 100_000.0
         return if (isBuilding) {
             val h = props.optDouble("height", 0.0)
-            val kind = if (h > 60) "Rezidans" else if (h > 25) "Plaza" else "Apartman"
+            val kind = when { h > 60 -> "Rezidans"; h > 25 -> "Plaza"; h > 10 -> "Apartman"; else -> "Ev" }
             val cat = if (h > 25) Category.office else Category.building
-            val base = if (h > 60) 28_000_000.0 else if (h > 25) 22_000_000.0 else 7_000_000.0
-            val price = maxOf(2_000_000.0, round100k(base * (0.6 + seed * 1.6)))
+            val base = when { h > 60 -> 28_000_000.0; h > 25 -> 22_000_000.0; h > 10 -> 7_000_000.0; else -> 3_500_000.0 }
+            val price = maxOf(1_200_000.0, round100k(base * (0.6 + seed * 1.6)))
             Property("bld_${"%.5f".format(lat)}_${"%.5f".format(lng)}",
                 "${area.district} $kind No.${(seed * 90).toInt() + 1}", area.district, area.city,
                 cat, price, maxOf(1500.0, (price * 0.0009)), if (cat == Category.office) 3 else 1, lat, lng)

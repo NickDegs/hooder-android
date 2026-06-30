@@ -40,13 +40,7 @@ data class OwnedItem(val id: String, val price: Double, val income: Double)
 data class FxPosition(val units: Double, val costUSD: Double)
 data class Leader(val name: String, val netWorth: Double)
 
-// Rakip sahipler (deterministik, iOS ile aynı): ~%35 mülk rakip elinde → doğrudan alınamaz, teklif gerekir
+// Rakip sahipler: artık DEVRE DIŞI — her mülk (apartman/ev/her şey) doğrudan satın alınabilir.
 object Rivals {
-    private val names = listOf("Emir Holding", "Defne Yatırım", "Kaya Group", "Marina Estates",
-        "Atlas Realty", "Boğaz Capital", "Nova İnşaat")
-    fun owner(p: Property): String? {
-        if (p.vipOnly) return null
-        val h = Math.abs(p.id.hashCode())
-        return if (h % 100 < 35) names[h % names.size] else null
-    }
+    fun owner(p: Property): String? = null
 }
