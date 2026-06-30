@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Hooder</string>
+    <string name="cash">CASH</string>
+    <string name="tab_map">Map</string>
+    <string name="tab_market">Market</string>
+    <string name="tab_portfolio">Portfolio</string>
+    <string name="tab_forex">Forex</string>
+    <string name="tab_store">Store</string>
+    <string name="tab_rankings">Ranks</string>
+    <string name="tab_settings">Settings</string>
+    <string name="search_place">Search place: city, country…</string>
+    <string name="list">List</string>
+    <string name="buy">Buy</string>
+    <string name="owned">Owned</string>
+    <string name="auth_required">Connection &amp; identity required</string>
+    <string name="auth_checking">Verifying identity…</string>
+    <string name="auth_online_note">Hooder is played online. An internet connection is required to continue.</string>
+    <string name="retry">Retry</string>
+</resources>

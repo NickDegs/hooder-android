@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Hooder</string>
+    <string name="cash">NAKİT</string>
+    <string name="tab_map">Harita</string>
+    <string name="tab_market">Piyasa</string>
+    <string name="tab_portfolio">Portföy</string>
+    <string name="tab_forex">Döviz</string>
+    <string name="tab_store">Mağaza</string>
+    <string name="tab_rankings">Sıralama</string>
+    <string name="tab_settings">Ayarlar</string>
+    <string name="search_place">Yer ara: şehir, ülke, semt…</string>
+    <string name="list">Liste</string>
+    <string name="buy">Satın Al</string>
+    <string name="owned">Senin</string>
+    <string name="auth_required">Bağlantı ve kimlik gerekli</string>
+    <string name="auth_checking">Kimlik doğrulanıyor…</string>
+    <string name="auth_online_note">Hooder çevrimiçi oynanır. Devam etmek için internet bağlantısı gerekir.</string>
+    <string name="retry">Tekrar dene</string>
+</resources>
