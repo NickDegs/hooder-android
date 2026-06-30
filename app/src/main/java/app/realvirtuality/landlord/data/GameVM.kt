@@ -104,6 +104,13 @@ class GameVM(app: Application) : AndroidViewModel(app) {
 
     fun loadLeaderboard() { viewModelScope.launch { leaders.value = Api.leaderboard() } }
 
+    // Yer ara → koordinat bul → o bölgeyi yükle → haritayı oraya uçur (onFound)
+    fun search(query: String, onFound: (Double, Double) -> Unit) {
+        viewModelScope.launch {
+            Api.geocode(query)?.let { (lat, lng) -> loadArea(lat, lng); onFound(lat, lng) }
+        }
+    }
+
     // Play Billing satın alımı sunucuda doğrulanır → nakit/VIP sunucudan güncellenir
     fun grantPlayPurchase(kind: String, productId: String, token: String) {
         viewModelScope.launch {

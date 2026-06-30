@@ -3,7 +3,14 @@ package app.realvirtuality.landlord.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -12,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.realvirtuality.landlord.data.GameVM
@@ -19,6 +27,7 @@ import app.realvirtuality.landlord.data.Property
 import app.realvirtuality.landlord.ui.money
 import app.realvirtuality.landlord.ui.theme.Brand
 import com.mapbox.geojson.Point
+import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.compose.MapEffect
@@ -29,12 +38,14 @@ import com.mapbox.maps.extension.compose.style.MapStyle
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 
-@OptIn(com.mapbox.maps.MapboxExperimental::class)
+@OptIn(com.mapbox.maps.MapboxExperimental::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(vm: GameVM) {
     val props by vm.properties.collectAsState()
     val owned by vm.ownedIds.collectAsState()
     var selected by remember { mutableStateOf<Property?>(null) }
+    var showList by remember { mutableStateOf(false) }
+    var query by remember { mutableStateOf("") }
 
     val viewport = rememberMapViewportState {
         setCameraOptions {
@@ -66,10 +77,62 @@ fun MapScreen(vm: GameVM) {
                 }
             }
         }
+
+        // Üst: yer arama çubuğu (HUD'un altında)
+        Row(
+            Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 76.dp, start = 14.dp, end = 14.dp)
+                .fillMaxWidth().liquidGlass(18).padding(horizontal = 14.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.Filled.Search, null, tint = Brand.textMuted)
+            TextField(
+                value = query, onValueChange = { query = it },
+                placeholder = { Text("Yer ara: şehir, ülke…", color = Brand.textMuted) },
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent, unfocusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = Brand.text, unfocusedTextColor = Brand.text),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = {
+                    vm.search(query) { lat, lng ->
+                        viewport.flyTo(CameraOptions.Builder()
+                            .center(Point.fromLngLat(lng, lat)).zoom(13.5).pitch(45.0).build())
+                    }
+                }),
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        // Sol alt: bölge listesi
+        Button(onClick = { showList = true },
+            colors = ButtonDefaults.buttonColors(containerColor = Brand.surface),
+            shape = RoundedCornerShape(99.dp),
+            modifier = Modifier.align(Alignment.BottomStart).padding(start = 16.dp, bottom = 24.dp)) {
+            Icon(Icons.Filled.List, null, tint = Brand.primary)
+            Spacer(Modifier.width(6.dp)); Text("Liste", color = Brand.primary)
+        }
     }
 
     selected?.let { p ->
         BuySheet(p, vm, owned.contains(p.id)) { selected = null }
+    }
+
+    if (showList) {
+        val top = remember(props) { props.sortedByDescending { it.price }.take(60) }
+        ModalBottomSheet(onDismissRequest = { showList = false }, containerColor = Brand.surface) {
+            LazyColumn(Modifier.padding(bottom = 24.dp)) {
+                items(top) { p ->
+                    Row(Modifier.fillMaxWidth().clickable { showList = false; selected = p }
+                        .padding(horizontal = 18.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(p.category.emoji, fontSize = 20.sp); Spacer(Modifier.width(10.dp))
+                        Text(p.name, color = Brand.text, modifier = Modifier.weight(1f), maxLines = 1)
+                        Text(money(vm.livePrice(p)), color = if (owned.contains(p.id)) Brand.green else Brand.gold,
+                            fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
     }
 }
 

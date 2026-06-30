@@ -127,6 +127,21 @@ object Api {
         "general" to Triple(Category.building, 30_000_000.0, 2),
     )
 
+    // Yer arama (forward geocode): şehir/semt → koordinat (lat,lng)
+    suspend fun geocode(query: String): Pair<Double, Double>? = withContext(Dispatchers.IO) {
+        if (MAPBOX.startsWith("pk.placeholder") || query.trim().length < 2) return@withContext null
+        val q = enc(query.trim())
+        val url = "https://api.mapbox.com/geocoding/v5/mapbox.places/$q.json?limit=1&access_token=$MAPBOX"
+        try {
+            client.newCall(Request.Builder().url(url).build()).execute().use { r ->
+                val fs = JSONObject(r.body?.string().orEmpty()).optJSONArray("features") ?: return@withContext null
+                if (fs.length() == 0) return@withContext null
+                val c = fs.getJSONObject(0).optJSONArray("center") ?: return@withContext null
+                c.getDouble(1) to c.getDouble(0)
+            }
+        } catch (_: Exception) { null }
+    }
+
     suspend fun fetchArea(lat: Double, lng: Double): List<Property> = withContext(Dispatchers.IO) {
         if (MAPBOX.startsWith("pk.placeholder")) return@withContext emptyList()
         val ctx = reverseGeocode(lat, lng)
