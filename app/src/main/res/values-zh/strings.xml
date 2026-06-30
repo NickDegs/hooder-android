@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Hooder</string>
+    <string name="cash">现金</string>
+    <string name="tab_map">地图</string>
+    <string name="tab_market">市场</string>
+    <string name="tab_portfolio">投资组合</string>
+    <string name="tab_forex">外汇</string>
+    <string name="tab_store">商店</string>
+    <string name="tab_rankings">排名</string>
+    <string name="tab_settings">设置</string>
+    <string name="search_place">搜索房产、城市…</string>
+    <string name="list">列表</string>
+    <string name="buy">购买</string>
+    <string name="owned">已拥有</string>
+    <string name="retry">重试</string>
+    <string name="auth_checking">正在验证…</string>
+    <string name="auth_required">需要连接与身份</string>
+    <string name="auth_online_note">Hooder 为在线游戏，需要联网。</string>
+</resources>

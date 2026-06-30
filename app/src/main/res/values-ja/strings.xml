@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Hooder</string>
+    <string name="cash">現金</string>
+    <string name="tab_map">地図</string>
+    <string name="tab_market">市場</string>
+    <string name="tab_portfolio">ポート</string>
+    <string name="tab_forex">為替</string>
+    <string name="tab_store">ストア</string>
+    <string name="tab_rankings">順位</string>
+    <string name="tab_settings">設定</string>
+    <string name="search_place">物件・都市…</string>
+    <string name="list">リスト</string>
+    <string name="buy">購入</string>
+    <string name="owned">所有済み</string>
+    <string name="retry">再試行</string>
+    <string name="auth_checking">確認中…</string>
+    <string name="auth_required">接続と認証が必要</string>
+    <string name="auth_online_note">Hooderはオンライン専用です。接続が必要です。</string>
+</resources>

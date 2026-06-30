@@ -23,6 +23,7 @@ class GameVM(app: Application) : AndroidViewModel(app) {
     val properties: MutableStateFlow<List<Property>> = MutableStateFlow(emptyList())
     val rates = MutableStateFlow<Map<String, Double>>(emptyMap())
     val marketIndex = MutableStateFlow(1.0)
+    val leaders = MutableStateFlow<List<Leader>>(emptyList())
 
     private val prefs = app.getSharedPreferences("hooder", Context.MODE_PRIVATE)
     private val registry = LinkedHashMap<String, Property>()
@@ -100,6 +101,17 @@ class GameVM(app: Application) : AndroidViewModel(app) {
     }
 
     fun isOwned(id: String) = ownedIds.value.contains(id)
+
+    fun loadLeaderboard() { viewModelScope.launch { leaders.value = Api.leaderboard() } }
+
+    // Play Billing satın alımı sunucuda doğrulanır → nakit/VIP sunucudan güncellenir
+    fun grantPlayPurchase(kind: String, productId: String, token: String) {
+        viewModelScope.launch {
+            val c = Api.playPurchase(kind, productId, token)
+            if (c != null && c > 0) cash.value = c
+            syncWallet()
+        }
+    }
 
     fun buy(p: Property, onResult: (Boolean) -> Unit) {
         val cost = livePrice(p)

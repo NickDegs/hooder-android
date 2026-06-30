@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Hooder</string>
+    <string name="cash">ГОТІВКА</string>
+    <string name="tab_map">Карта</string>
+    <string name="tab_market">Ринок</string>
+    <string name="tab_portfolio">Портфель</string>
+    <string name="tab_forex">Форекс</string>
+    <string name="tab_store">Магазин</string>
+    <string name="tab_rankings">Рейтинг</string>
+    <string name="tab_settings">Налаштування</string>
+    <string name="search_place">Об\'єкт, місто…</string>
+    <string name="list">Список</string>
+    <string name="buy">Купити</string>
+    <string name="owned">У власності</string>
+    <string name="retry">Повторити</string>
+    <string name="auth_checking">Перевірка…</string>
+    <string name="auth_required">Потрібне з\'єднання</string>
+    <string name="auth_online_note">Hooder грається онлайн. Потрібен інтернет.</string>
+</resources>

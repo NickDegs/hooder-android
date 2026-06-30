@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Hooder</string>
+    <string name="cash">CASH</string>
+    <string name="tab_map">Carte</string>
+    <string name="tab_market">Marché</string>
+    <string name="tab_portfolio">Portefeuille</string>
+    <string name="tab_forex">Devises</string>
+    <string name="tab_store">Boutique</string>
+    <string name="tab_rankings">Classement</string>
+    <string name="tab_settings">Réglages</string>
+    <string name="search_place">Bien, ville…</string>
+    <string name="list">Liste</string>
+    <string name="buy">Acheter</string>
+    <string name="owned">Possédé</string>
+    <string name="retry">Réessayer</string>
+    <string name="auth_checking">Vérification…</string>
+    <string name="auth_required">Connexion requise</string>
+    <string name="auth_online_note">Hooder se joue en ligne. Internet requis.</string>
+</resources>

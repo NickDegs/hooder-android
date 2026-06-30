@@ -3,6 +3,7 @@ package app.realvirtuality.landlord.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -116,8 +117,22 @@ fun StoreScreen(vm: GameVM) {
 
 @Composable
 fun RankingsScreen(vm: GameVM) {
+    val leaders by vm.leaders.collectAsState()
+    LaunchedEffect(Unit) { vm.loadLeaderboard() }
     ScreenScaffold("Sıralama") {
-        Text("Liderlik tablosu yakında.", color = Brand.textMuted, modifier = Modifier.padding(16.dp))
+        if (leaders.isEmpty())
+            Text("Liderlik yükleniyor…", color = Brand.textMuted, modifier = Modifier.padding(16.dp))
+        else LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
+            itemsIndexed(leaders) { i, l ->
+                Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 5.dp)
+                    .liquidGlass(16).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("#${i + 1}", color = if (i < 3) Brand.gold else Brand.textMuted,
+                        fontWeight = FontWeight.Bold, modifier = Modifier.width(44.dp))
+                    Text(l.name, color = Brand.text, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                    Text(money(l.netWorth), color = Brand.gold, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
     }
 }
 

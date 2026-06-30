@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Hooder</string>
+    <string name="cash">نقد</string>
+    <string name="tab_map">نقشه</string>
+    <string name="tab_market">بازار</string>
+    <string name="tab_portfolio">سبد</string>
+    <string name="tab_forex">ارز</string>
+    <string name="tab_store">فروشگاه</string>
+    <string name="tab_rankings">رتبه</string>
+    <string name="tab_settings">تنظیمات</string>
+    <string name="search_place">ملک، شهر…</string>
+    <string name="list">فهرست</string>
+    <string name="buy">خرید</string>
+    <string name="owned">مالک</string>
+    <string name="retry">تلاش مجدد</string>
+    <string name="auth_checking">در حال تأیید…</string>
+    <string name="auth_required">اتصال لازم است</string>
+    <string name="auth_online_note">Hooder آنلاین است. اینترنت لازم است.</string>
+</resources>

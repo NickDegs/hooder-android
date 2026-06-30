@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Hooder</string>
+    <string name="cash">نقد</string>
+    <string name="tab_map">خريطة</string>
+    <string name="tab_market">السوق</string>
+    <string name="tab_portfolio">المحفظة</string>
+    <string name="tab_forex">عملات</string>
+    <string name="tab_store">المتجر</string>
+    <string name="tab_rankings">الترتيب</string>
+    <string name="tab_settings">الإعدادات</string>
+    <string name="search_place">عقار، مدينة…</string>
+    <string name="list">قائمة</string>
+    <string name="buy">شراء</string>
+    <string name="owned">مملوك</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="auth_checking">جارٍ التحقق…</string>
+    <string name="auth_required">يلزم الاتصال والهوية</string>
+    <string name="auth_online_note">تُلعب Hooder عبر الإنترنت. يلزم اتصال بالإنترنت.</string>
+</resources>

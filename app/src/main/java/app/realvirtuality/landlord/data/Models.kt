@@ -34,3 +34,4 @@ data class Wallet(
 )
 data class OwnedItem(val id: String, val price: Double, val income: Double)
 data class FxPosition(val units: Double, val costUSD: Double)
+data class Leader(val name: String, val netWorth: Double)

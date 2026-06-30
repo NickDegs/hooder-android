@@ -86,6 +86,27 @@ object Api {
         call(req("economy/trade").post(bodyOf(JSONObject().put("buy", buy).put("magnitude", magnitude))))
     } }
 
+    // Liderlik (sunucu-otoriter net değer) — JSON dizi döner
+    suspend fun leaderboard(): List<Leader> = withContext(Dispatchers.IO) {
+        try {
+            client.newCall(req("leaderboard").get().build()).execute().use { r ->
+                val s = r.body?.string().orEmpty()
+                if (!r.isSuccessful || s.isEmpty()) return@withContext emptyList()
+                val arr = JSONArray(s)
+                (0 until arr.length()).map {
+                    val o = arr.getJSONObject(it); Leader(o.optString("name", "—"), o.optDouble("netWorth"))
+                }
+            }
+        } catch (_: Exception) { emptyList() }
+    }
+
+    // Play Billing satın alımını sunucuda doğrulat (consumable: kind=product, sub: kind=sub)
+    suspend fun playPurchase(kind: String, productId: String, token: String): Double? = withContext(Dispatchers.IO) {
+        call(req("wallet/play-grant").post(bodyOf(
+            JSONObject().put("kind", kind).put("product_id", productId).put("purchase_token", token))))
+            ?.takeIf { it.optBoolean("ok") }?.optDouble("cash", 0.0)
+    }
+
     // ── Mülkler: Mapbox tilequery + reverse geocode → satın alınabilir Property ──
     private fun enc(s: String) = URLEncoder.encode(s, "UTF-8")
     private fun hash01(s: String): Double {

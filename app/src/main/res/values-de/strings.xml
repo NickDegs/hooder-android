@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Hooder</string>
+    <string name="cash">BARGELD</string>
+    <string name="tab_map">Karte</string>
+    <string name="tab_market">Markt</string>
+    <string name="tab_portfolio">Portfolio</string>
+    <string name="tab_forex">Devisen</string>
+    <string name="tab_store">Shop</string>
+    <string name="tab_rankings">Rang</string>
+    <string name="tab_settings">Einstellungen</string>
+    <string name="search_place">Immobilie, Stadt…</string>
+    <string name="list">Liste</string>
+    <string name="buy">Kaufen</string>
+    <string name="owned">Im Besitz</string>
+    <string name="retry">Erneut versuchen</string>
+    <string name="auth_checking">Identität wird geprüft…</string>
+    <string name="auth_required">Verbindung erforderlich</string>
+    <string name="auth_online_note">Hooder wird online gespielt. Internet erforderlich.</string>
+</resources>
