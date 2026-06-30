@@ -22,6 +22,7 @@ import app.realvirtuality.landlord.data.GameVM
 import app.realvirtuality.landlord.ui.screens.*
 import app.realvirtuality.landlord.ui.theme.Brand
 import app.realvirtuality.landlord.ui.theme.liquidGlass
+import app.realvirtuality.landlord.ui.theme.specularSweep
 import java.text.NumberFormat
 
 @Composable
@@ -92,7 +93,7 @@ private fun HudBar(vm: GameVM, modifier: Modifier = Modifier) {
     val vip by vm.isVip.collectAsState()
     Row(
         modifier.fillMaxWidth().statusBarsPadding().padding(12.dp)
-            .liquidGlass(18).padding(horizontal = 16.dp, vertical = 12.dp),
+            .liquidGlass(18).specularSweep(18).padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(if (vip) "Hooder 👑" else "Hooder", color = Brand.text,
