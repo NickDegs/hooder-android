@@ -21,12 +21,13 @@ import app.realvirtuality.landlord.ui.theme.Brand
 import com.mapbox.geojson.Point
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
-import com.mapbox.maps.ViewAnnotationOptions
 import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.style.MapStyle
+import com.mapbox.maps.viewannotation.geometry
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
 
 @OptIn(com.mapbox.maps.MapboxExperimental::class)
 @Composable
@@ -56,9 +57,10 @@ fun MapScreen(vm: GameVM) {
             }
             props.take(300).forEach { p ->
                 ViewAnnotation(
-                    options = ViewAnnotationOptions.Builder()
-                        .geometry(Point.fromLngLat(p.lng, p.lat))
-                        .allowOverlap(false).build()
+                    options = viewAnnotationOptions {
+                        geometry(Point.fromLngLat(p.lng, p.lat))
+                        allowOverlap(false)
+                    }
                 ) {
                     Pill(p, owned.contains(p.id), vm) { selected = p }
                 }
