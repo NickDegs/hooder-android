@@ -6,9 +6,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.play.core.integrity.IntegrityManagerFactory
 import com.google.android.play.core.integrity.IntegrityTokenRequest
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.util.UUID
 import kotlin.coroutines.resume
 
@@ -25,10 +30,67 @@ class GameVM(app: Application) : AndroidViewModel(app) {
     val marketIndex = MutableStateFlow(1.0)
     val leaders = MutableStateFlow<List<Leader>>(emptyList())
     val fx = MutableStateFlow<Map<String, FxPosition>>(emptyMap())
+    val cityProgress = MutableStateFlow(1f)        // <1 iken "şehir iniyor" rozeti
 
     private val prefs = app.getSharedPreferences("hooder", Context.MODE_PRIVATE)
     private val registry = LinkedHashMap<String, Property>()
     private val fetched = HashSet<String>()
+    private val cities = HashSet<String>()
+    private val json = Json { ignoreUnknownKeys = true }
+    private var ingestCount = 0
+
+    init { hydrate() }   // KALICI CACHE: diskteki mülkler açılışta ANINDA gelir
+
+    private fun hydrate() {
+        prefs.getString("props_v1", null)?.let { s ->
+            runCatching { json.decodeFromString<List<Property>>(s) }.getOrNull()?.let { list ->
+                list.forEach { registry[it.id] = it }
+                properties.value = registry.values.toList()
+            }
+        }
+        prefs.getStringSet("fetched_v1", null)?.let { fetched.addAll(it) }
+        prefs.getStringSet("cities_v1", null)?.let { cities.addAll(it) }
+    }
+
+    private fun persist() {
+        val arr = registry.values.toList().takeLast(20000)
+        prefs.edit()
+            .putString("props_v1", json.encodeToString(arr))
+            .putStringSet("fetched_v1", fetched.toSet())
+            .putStringSet("cities_v1", cities.toSet())
+            .apply()
+    }
+
+    // BULUNDUĞUN ŞEHRİ KOMPLE İNDİR (ızgara) → şehir içinde her yer anında + kalıcı
+    fun downloadCity(lat: Double, lng: Double) {
+        val key = "%.1f,%.1f".format(lat, lng)   // ~11 km kova → şehir bir kez iner
+        if (!cities.add(key)) return
+        viewModelScope.launch {
+            cityProgress.value = 0f
+            val span = 0.09; val step = 0.014
+            val cells = ArrayList<Pair<Double, Double>>()
+            var la = lat - span
+            while (la <= lat + span) { var ln = lng - span; while (ln <= lng + span) { cells.add(la to ln); ln += step }; la += step }
+            val capped = cells.take(220)
+            var done = 0
+            for (batch in capped.chunked(8)) {
+                val res = coroutineScope { batch.map { (a, b) -> async { Api.fetchArea(a, b) } }.awaitAll() }
+                ingest(res.flatten())
+                done += batch.size
+                cityProgress.value = done.toFloat() / capped.size
+            }
+            cityProgress.value = 1f
+            persist()
+        }
+    }
+
+    fun clearCache(): Int {
+        val n = registry.size
+        registry.clear(); fetched.clear(); cities.clear()
+        prefs.edit().remove("props_v1").remove("fetched_v1").remove("cities_v1").apply()
+        properties.value = emptyList()
+        return n
+    }
 
     private fun deviceId(): String {
         prefs.getString("device_id", null)?.let { return it }
@@ -64,10 +126,7 @@ class GameVM(app: Application) : AndroidViewModel(app) {
     private fun startup() {
         viewModelScope.launch { syncWallet() }
         viewModelScope.launch { economyLoop() }
-        viewModelScope.launch {
-            val added = Api.fetchArea(41.0082, 28.9784)   // İstanbul başlangıç
-            ingest(added)
-        }
+        downloadCity(41.0082, 28.9784)   // açılışta İstanbul'u komple indir (kalıcı)
     }
 
     suspend fun syncWallet() {
@@ -114,6 +173,7 @@ class GameVM(app: Application) : AndroidViewModel(app) {
         if (list.isEmpty()) return
         for (p in list) registry.putIfAbsent(p.id, p)
         properties.value = registry.values.toList()
+        if (++ingestCount % 5 == 0) persist()   // diske kaydet (kalıcı cache)
     }
 
     fun livePrice(p: Property): Double {

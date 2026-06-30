@@ -206,6 +206,18 @@ fun SettingsScreen(vm: GameVM) {
                     }
                 }
             }
+            var cleared by remember { mutableStateOf<String?>(null) }
+            Column(Modifier.fillMaxWidth().liquidGlass(16).padding(14.dp)) {
+                Text("Önbellek (İndirilen Mülkler)", color = Brand.text, fontWeight = FontWeight.SemiBold)
+                Text("Gezdiğin şehirler cihazda saklanır → tekrar açınca anında. Temizlersen yer açılır.",
+                    color = Brand.textSub, fontSize = 13.sp)
+                cleared?.let { Text(it, color = Brand.green, fontSize = 13.sp) }
+                Button(onClick = { cleared = "✓ ${vm.clearCache()} mülk temizlendi" },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE6991F)),
+                    shape = RoundedCornerShape(99.dp), modifier = Modifier.padding(top = 8.dp)) {
+                    Text("Önbelleği Temizle")
+                }
+            }
             InfoCard("Sunucu-Otoriter Ekonomi",
                 "Nakit, mülk ve gelir sunucuda tutulur — hile/korsan kazanç sağlamaz.")
             InfoCard("Çevrimiçi Kimlik", "Oyun kimlik/token olmadan ve internetsiz açılmaz.")

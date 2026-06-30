@@ -55,6 +55,7 @@ fun MapScreen(vm: GameVM) {
     var selected by remember { mutableStateOf<Property?>(null) }
     var showList by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
+    val cityProg by vm.cityProgress.collectAsState()
 
     val viewport = rememberMapViewportState {
         setCameraOptions {
@@ -70,6 +71,7 @@ fun MapScreen(vm: GameVM) {
             fused.lastLocation.addOnSuccessListener { loc ->
                 if (loc != null) {
                     vm.loadArea(loc.latitude, loc.longitude)
+                    vm.downloadCity(loc.latitude, loc.longitude)
                     viewport.flyTo(CameraOptions.Builder()
                         .center(Point.fromLngLat(loc.longitude, loc.latitude)).zoom(14.0).pitch(45.0).build())
                 }
@@ -89,6 +91,7 @@ fun MapScreen(vm: GameVM) {
                 mapView.mapboxMap.subscribeMapIdle {
                     val c = mapView.mapboxMap.cameraState.center
                     vm.loadArea(c.latitude(), c.longitude())
+                    vm.downloadCity(c.latitude(), c.longitude())   // bulunduğun şehri komple indir (dedup)
                 }
             }
             props.take(300).forEach { p ->
@@ -121,12 +124,21 @@ fun MapScreen(vm: GameVM) {
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = {
                     vm.search(query) { lat, lng ->
+                        vm.downloadCity(lat, lng)
                         viewport.flyTo(CameraOptions.Builder()
                             .center(Point.fromLngLat(lng, lat)).zoom(13.5).pitch(45.0).build())
                     }
                 }),
                 modifier = Modifier.weight(1f)
             )
+        }
+
+        // Şehir indirme ilerleme rozeti (arama çubuğunun altında)
+        if (cityProg < 1f) {
+            Text("Şehir mülkleri iniyor… ${(cityProg * 100).toInt()}%",
+                color = Brand.text, fontSize = 12.sp,
+                modifier = Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 142.dp)
+                    .liquidGlass(99).padding(horizontal = 12.dp, vertical = 6.dp))
         }
 
         // Sol alt: bölge listesi
