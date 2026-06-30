@@ -1,5 +1,8 @@
 package app.realvirtuality.landlord.ui.screens
 
+import android.app.Activity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,9 +10,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import android.app.Activity
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -120,8 +125,18 @@ fun ForexScreen(vm: GameVM) {
 @Composable
 fun StoreScreen(vm: GameVM, billing: Billing) {
     val list by billing.items.collectAsState()
+    val vip by vm.isVip.collectAsState()
     val activity = LocalContext.current as? Activity
     ScreenScaffold("Mağaza") {
+        if (vip) Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 5.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Brush.horizontalGradient(listOf(Color(0xFF5A4410), Color(0xFF2A2008))))
+            .border(1.dp, Brand.gold.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+            .padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("👑", fontSize = 24.sp); Spacer(Modifier.width(10.dp))
+            Column { Text("VIP Üye", color = Brand.gold, fontWeight = FontWeight.Bold)
+                Text("+%25 gelir · özel mülkler · altın tema", color = Brand.textSub, fontSize = 12.sp) }
+        }
         if (list.isEmpty())
             Text("Ürünler yükleniyor…", color = Brand.textMuted, modifier = Modifier.padding(16.dp))
         else LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
