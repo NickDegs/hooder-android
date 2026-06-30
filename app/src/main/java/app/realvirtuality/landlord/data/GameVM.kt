@@ -4,9 +4,13 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.play.core.integrity.IntegrityManagerFactory
+import com.google.android.play.core.integrity.IntegrityTokenRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.UUID
+import kotlin.coroutines.resume
 
 // Oyun durumu — sunucu-otoriter; kimlik alınana kadar oyun KİLİTLİ (offline/korsan engeli)
 class GameVM(app: Application) : AndroidViewModel(app) {
@@ -30,15 +34,29 @@ class GameVM(app: Application) : AndroidViewModel(app) {
         prefs.edit().putString("device_id", id).apply(); return id
     }
 
-    // ── KİLİT: internet + sunucu kimliği ZORUNLU (Play Integrity güvenlik fazında eklenecek) ──
+    // ── KİLİT: internet + Play Integrity + sunucu kimliği ZORUNLU ────────────────
     fun authenticate() {
         connecting.value = true
         viewModelScope.launch {
-            val tok = Api.anon(deviceId())
+            val integrity = requestIntegrity()      // korsan/tamper APK → sunucu reddeder
+            val tok = Api.anon(deviceId(), integrity)
             ready.value = tok != null
             connecting.value = false
             if (tok != null) startup()
         }
+    }
+
+    // Play Integrity token (classic istek) — nonce ile; Play'den gelmeyen/değiştirilmiş
+    // APK'da Google geçerli token vermez → backend reddeder.
+    private suspend fun requestIntegrity(): String? = suspendCancellableCoroutine { cont ->
+        try {
+            val mgr = IntegrityManagerFactory.create(getApplication())
+            val nonce = java.lang.Long.toHexString(System.nanoTime()) +
+                UUID.randomUUID().toString().replace("-", "")
+            mgr.requestIntegrityToken(IntegrityTokenRequest.builder().setNonce(nonce).build())
+                .addOnSuccessListener { r -> if (cont.isActive) cont.resume(r.token()) }
+                .addOnFailureListener { if (cont.isActive) cont.resume(null) }
+        } catch (_: Exception) { if (cont.isActive) cont.resume(null) }
     }
 
     private fun startup() {
