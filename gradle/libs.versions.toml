@@ -13,6 +13,7 @@ datastore = "1.1.1"
 billing = "7.1.1"
 mapbox = "11.9.0"
 playIntegrity = "1.4.0"
+playLocation = "21.3.0"
 junit = "4.13.2"
 
 [libraries]
@@ -36,6 +37,7 @@ billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", versi
 mapbox-maps = { group = "com.mapbox.maps", name = "android", version.ref = "mapbox" }
 mapbox-compose = { group = "com.mapbox.extension", name = "maps-compose", version.ref = "mapbox" }
 play-integrity = { group = "com.google.android.play", name = "integrity", version.ref = "playIntegrity" }
+play-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playLocation" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 
 [plugins]

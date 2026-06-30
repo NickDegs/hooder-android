@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.mapbox.maps)
     implementation(libs.mapbox.compose)
     implementation(libs.play.integrity)
+    implementation(libs.play.location)
     debugImplementation(libs.compose.ui.tooling)
     testImplementation(libs.junit)
 }

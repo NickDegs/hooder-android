@@ -1,5 +1,10 @@
 package app.realvirtuality.landlord.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,6 +15,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -28,6 +35,7 @@ import app.realvirtuality.landlord.ui.money
 import app.realvirtuality.landlord.ui.theme.Brand
 import app.realvirtuality.landlord.ui.theme.liquidGlass
 import com.mapbox.geojson.Point
+import com.google.android.gms.location.LocationServices
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
 import com.mapbox.maps.Style
@@ -54,6 +62,22 @@ fun MapScreen(vm: GameVM) {
             zoom(13.5); pitch(45.0)
         }
     }
+
+    val context = LocalContext.current
+    val fused = remember { LocationServices.getFusedLocationProviderClient(context) }
+    fun locate() {
+        try {
+            fused.lastLocation.addOnSuccessListener { loc ->
+                if (loc != null) {
+                    vm.loadArea(loc.latitude, loc.longitude)
+                    viewport.flyTo(CameraOptions.Builder()
+                        .center(Point.fromLngLat(loc.longitude, loc.latitude)).zoom(14.0).pitch(45.0).build())
+                }
+            }
+        } catch (_: SecurityException) {}
+    }
+    val permLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()) { granted -> if (granted) locate() }
 
     Box(Modifier.fillMaxSize()) {
         MapboxMap(
@@ -112,6 +136,18 @@ fun MapScreen(vm: GameVM) {
             modifier = Modifier.align(Alignment.BottomStart).padding(start = 16.dp, bottom = 24.dp)) {
             Icon(Icons.Filled.List, null, tint = Brand.primary)
             Spacer(Modifier.width(6.dp)); Text("Liste", color = Brand.primary)
+        }
+
+        // Sağ alt: konumuma git
+        FloatingActionButton(
+            onClick = {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) locate()
+                else permLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            },
+            containerColor = Brand.surface,
+            modifier = Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = 24.dp)) {
+            Icon(Icons.Filled.MyLocation, null, tint = Brand.primary)
         }
     }
 
