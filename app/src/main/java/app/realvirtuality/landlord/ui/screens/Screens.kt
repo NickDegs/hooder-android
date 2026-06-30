@@ -7,11 +7,14 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import android.app.Activity
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.realvirtuality.landlord.data.Billing
 import app.realvirtuality.landlord.data.GameVM
 import app.realvirtuality.landlord.data.Property
 import app.realvirtuality.landlord.ui.money
@@ -95,20 +98,23 @@ fun ForexScreen(vm: GameVM) {
 }
 
 @Composable
-fun StoreScreen(vm: GameVM) {
-    val packs = listOf("Başlangıç" to "1.5M", "Yatırımcı" to "9M", "Tycoon" to "30M",
-        "Mogul" to "90M", "İmparatorluk" to "250M")
+fun StoreScreen(vm: GameVM, billing: Billing) {
+    val list by billing.items.collectAsState()
+    val activity = LocalContext.current as? Activity
     ScreenScaffold("Mağaza") {
-        Text("Nakit paketleri (Play Billing yakında bağlanacak)",
-            color = Brand.textMuted, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp))
-        Spacer(Modifier.height(8.dp))
-        LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
-            items(packs) { (name, amt) ->
+        if (list.isEmpty())
+            Text("Ürünler yükleniyor…", color = Brand.textMuted, modifier = Modifier.padding(16.dp))
+        else LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
+            items(list) { item ->
                 Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 5.dp)
                     .liquidGlass(16).padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("💰  $name", color = Brand.text, fontWeight = FontWeight.SemiBold)
-                    Spacer(Modifier.weight(1f))
-                    Text("+\$$amt", color = Brand.gold, fontWeight = FontWeight.Bold)
+                    Text("${if (item.sub) "👑" else "💰"}  ${item.title}",
+                        color = Brand.text, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                    Button(onClick = { activity?.let { billing.buy(it, item.id) } },
+                        colors = ButtonDefaults.buttonColors(containerColor = Brand.primary),
+                        shape = RoundedCornerShape(99.dp)) {
+                        Text(item.price.ifEmpty { "Satın Al" }, fontSize = 13.sp)
+                    }
                 }
             }
         }

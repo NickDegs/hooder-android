@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.realvirtuality.landlord.R
+import app.realvirtuality.landlord.data.Billing
 import app.realvirtuality.landlord.data.GameVM
 import app.realvirtuality.landlord.ui.screens.*
 import app.realvirtuality.landlord.ui.theme.Brand
@@ -24,20 +25,23 @@ import app.realvirtuality.landlord.ui.theme.liquidGlass
 import java.text.NumberFormat
 
 @Composable
-fun HooderApp() {
+fun HooderApp(billing: Billing) {
     val vm: GameVM = viewModel()
     val ready by vm.ready.collectAsState()
     val connecting by vm.connecting.collectAsState()
-    LaunchedEffect(Unit) { vm.authenticate() }
+    LaunchedEffect(Unit) {
+        vm.authenticate()
+        billing.onGrant = { kind, pid, tok -> vm.grantPlayPurchase(kind, pid, tok) }
+    }
 
     if (!ready) LockScreen(connecting) { vm.authenticate() }
-    else GameScaffold(vm)
+    else GameScaffold(vm, billing)
 }
 
 private data class Tab(val labelRes: Int, val icon: ImageVector)
 
 @Composable
-private fun GameScaffold(vm: GameVM) {
+private fun GameScaffold(vm: GameVM, billing: Billing) {
     var sel by remember { mutableIntStateOf(0) }
     val tabs = listOf(
         Tab(R.string.tab_map, Icons.Filled.Map),
@@ -73,7 +77,7 @@ private fun GameScaffold(vm: GameVM) {
                 1 -> MarketScreen(vm)
                 2 -> PortfolioScreen(vm)
                 3 -> ForexScreen(vm)
-                4 -> StoreScreen(vm)
+                4 -> StoreScreen(vm, billing)
                 5 -> RankingsScreen(vm)
                 else -> SettingsScreen(vm)
             }
